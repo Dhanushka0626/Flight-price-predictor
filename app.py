@@ -1,61 +1,87 @@
-from flask import Flask, request, render_template
+import streamlit as st
 import pickle
 import numpy as np
-import pandas as pd
-
-app = Flask(__name__)
 
 
-def prediction(lst):
-    filename = 'model/predictor.pickle'
-    with open(filename, 'rb') as file:
+@st.cache_resource
+def load_model():
+    with open("model/predictor.pickle", "rb") as file:
         model = pickle.load(file)
-    pred_value = model.predict([lst])
-    return pred_value
+    return model
 
 
-@app.route('/', methods=['POST','GET'])
-def index():
-    pred = 0
-    if request.method == 'POST':
-        Stops = request.form['stops']
-        Class = request.form['class']
-        Duration = request.form['duration']
-        Days_left = request.form['days_left']
-        Airline = request.form['airline']
-        Source = request.form['source']
-        Destination = request.form['destination']
-        Departure = request.form['departure']
-        Arrival = request.form['arrival']
-        
-        feature_list = []
-        feature_list.append(int(Stops))
-        feature_list.append(float(Duration))
-        feature_list.append(int(Days_left))
-        feature_list.append(int(Class))
-        
-        Airline_list = ['AirAsia', 'Air_India', 'G0_FIRST', 'SpiceJet', 'Indigo', 'Vistara']
-        Destination_list = ['Delhi', 'Kolkata', 'Mumbai', 'Chennai', 'Bangalore', 'Hydabad']
-        Source_list = ['Delhi', 'Kolkata', 'Mumbai', 'Chennai', 'Bangalore', 'Hydabad']
-        Departure_list = ['Morning', 'Afternoon', 'Evening', 'Night', 'Early_morning', 'Late_night']
-        Arrival_list = ['Morning', 'Afternoon', 'Evening', 'Night', 'Early_morning', 'Late_night']
-        
-        def traverse(lst,value):
-            for i in lst:
-                if i == value:
-                    feature_list.append(1)
-                else:
-                    feature_list.append(0)
-        traverse(Airline_list,Airline)
-        traverse(Destination_list,Destination)
-        traverse(Source_list,Source)
-        traverse(Departure_list,Departure)
-        traverse(Arrival_list,Arrival)
-        
-        pred = prediction(feature_list)
-        pred = np.round(pred[0])
-        
-    return render_template('index.html', pred=pred)
+model = load_model()
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+def add_one_hot(feature_list, option_list, selected_value):
+    for item in option_list:
+        if item == selected_value:
+            feature_list.append(1)
+        else:
+            feature_list.append(0)
+
+
+st.title("Flight Price Predictor")
+st.write("Enter flight details below to predict the ticket price.")
+
+
+stops = st.selectbox("Number of Stops", [0, 1, 2])
+flight_class = st.selectbox("Class", ["Economy", "Business"])
+
+duration = st.number_input("Duration in hours", min_value=0.0, value=2.0, step=0.1)
+days_left = st.number_input("Days Left Before Travel", min_value=1, value=10, step=1)
+
+airline = st.selectbox(
+    "Airline",
+    ["AirAsia", "Air_India", "G0_FIRST", "SpiceJet", "Indigo", "Vistara"]
+)
+
+source = st.selectbox(
+    "Source City",
+    ["Delhi", "Kolkata", "Mumbai", "Chennai", "Bangalore", "Hydabad"]
+)
+
+destination = st.selectbox(
+    "Destination City",
+    ["Delhi", "Kolkata", "Mumbai", "Chennai", "Bangalore", "Hydabad"]
+)
+
+departure = st.selectbox(
+    "Departure Time",
+    ["Morning", "Afternoon", "Evening", "Night", "Early_morning", "Late_night"]
+)
+
+arrival = st.selectbox(
+    "Arrival Time",
+    ["Morning", "Afternoon", "Evening", "Night", "Early_morning", "Late_night"]
+)
+
+
+if st.button("Predict Price"):
+    feature_list = []
+
+    feature_list.append(int(stops))
+    feature_list.append(float(duration))
+    feature_list.append(int(days_left))
+
+    if flight_class == "Economy":
+        feature_list.append(0)
+    else:
+        feature_list.append(1)
+
+    airline_list = ["AirAsia", "Air_India", "G0_FIRST", "SpiceJet", "Indigo", "Vistara"]
+    destination_list = ["Delhi", "Kolkata", "Mumbai", "Chennai", "Bangalore", "Hydabad"]
+    source_list = ["Delhi", "Kolkata", "Mumbai", "Chennai", "Bangalore", "Hydabad"]
+    departure_list = ["Morning", "Afternoon", "Evening", "Night", "Early_morning", "Late_night"]
+    arrival_list = ["Morning", "Afternoon", "Evening", "Night", "Early_morning", "Late_night"]
+
+    add_one_hot(feature_list, airline_list, airline)
+    add_one_hot(feature_list, destination_list, destination)
+    add_one_hot(feature_list, source_list, source)
+    add_one_hot(feature_list, departure_list, departure)
+    add_one_hot(feature_list, arrival_list, arrival)
+
+    prediction = model.predict([feature_list])
+    predicted_price = np.round(prediction[0])
+
+    st.success(f"Predicted Flight Price: ₹ {predicted_price:,.0f}")
