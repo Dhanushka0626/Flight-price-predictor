@@ -1,2 +1,3 @@
-Flask
+streamlit
 numpy
+scikit-learn==1.7.2
