@@ -2,29 +2,14 @@ from flask import Flask, request, render_template
 import pickle
 import numpy as np
 import pandas as pd
-import os
-import gdown
 
 app = Flask(__name__)
 
-MODEL_PATH = "model/predictor.pickle"
-
-def download_model():
-    if not os.path.exists("model"):
-        os.makedirs("model")
-
-    if not os.path.exists(MODEL_PATH):
-        file_id = "1Uxk9WpD0uPcDd1xD8bMxtM_axy3u9Gyp"
-        url = f"https://drive.google.com/file/d/1Uxk9WpD0uPcDd1xD8bMxtM_axy3u9Gyp/view?usp=drive_link"
-        gdown.download(url, MODEL_PATH, quiet=False)
 
 def prediction(lst):
-
-    download_model()
-
-    with open(MODEL_PATH, 'rb') as file:
+    filename = 'model/predictor.pickle'
+    with open(filename, 'rb') as file:
         model = pickle.load(file)
-
     pred_value = model.predict([lst])
     return pred_value
 
