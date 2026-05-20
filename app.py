@@ -7,7 +7,7 @@ import gdown
 
 app = Flask(__name__)
 
-MODEL_PATH = "predictor.pickle"
+MODEL_PATH = "model/predictor.pickle"
 
 def download_model():
     if not os.path.exists("model"):
