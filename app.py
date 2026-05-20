@@ -15,16 +15,16 @@ def download_model():
 
     if not os.path.exists(MODEL_PATH):
         file_id = "1Uxk9WpD0uPcDd1xD8bMxtM_axy3u9Gyp"
-        url = f"https://drive.google.com/file/d/1Uxk9WpD0uPcDd1xD8bMxtM_axy3u9Gyp/view?usp=sharing"
+        url = f"https://drive.google.com/file/d/1Uxk9WpD0uPcDd1xD8bMxtM_axy3u9Gyp/view?usp=drive_link"
         gdown.download(url, MODEL_PATH, quiet=False)
 
-download_model()
-
-with open(MODEL_PATH, "rb") as file:
-    model = pickle.load(file)
-
-
 def prediction(lst):
+
+    download_model()
+
+    with open(MODEL_PATH, 'rb') as file:
+        model = pickle.load(file)
+
     pred_value = model.predict([lst])
     return pred_value
 
