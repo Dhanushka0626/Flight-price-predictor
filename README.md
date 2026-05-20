@@ -13,7 +13,7 @@ Try the application here: [Flight Price Predictor App](https://flight-price-pred
   - Number of stops (0-5)
   - Flight duration (in minutes)
   - Days left before departure
-  - Travel class (Economy, Business, First, Premium Economy)
+  - Travel class (Economy, Business)
   - Airline selection (AirAsia, Air India, GO_FIRST, SpiceJet, Indigo, Vistara)
   - Source city (Delhi, Kolkata, Mumbai, Chennai, Bangalore, Hyderabad)
   - Destination city (Delhi, Kolkata, Mumbai, Chennai, Bangalore, Hyderabad)
